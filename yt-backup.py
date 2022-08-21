@@ -374,14 +374,21 @@ def log_statistic(statistic_type, statistic_value):
     session.commit()
 
 
-def get_playlist_ids_from_google(local_channel_id):
+def get_playlist_ids_from_google(local_channel_id, next_page_token: str = None):
     # Check for exceeded google quota
     if check_quota_exceeded_state():
         logger.error("Cannot proceed with getting data from youtube API. Quota exceeded.")
         return None
     youtube = googleapiclient.discovery.build(api_service_name, api_version, credentials=get_google_api_credentials())
     logger.debug("Excuting youtube API call for getting playlists")
-    request = youtube.channels().list(part="contentDetails", id=local_channel_id)
+
+    request = youtube.playlists().list(
+        part="snippet,contentDetails",
+        channelId=local_channel_id,
+        maxResults=50,
+        pageToken=next_page_token
+    )
+
     try:
         response = request.execute()
         add_quota(3)
@@ -450,23 +457,38 @@ def get_channel_playlists(local_channel_id, monitored=1):
     if google_response is None:
         logger.error("Got no answer from google. I will skip this.")
         return None
-    for playlist in google_response['items'][0]['contentDetails']['relatedPlaylists']:
-        if playlist not in ["watchHistory", "watchLater", "favorites", "likes"]:
-            playlist_id = str(google_response['items'][0]['contentDetails']['relatedPlaylists'][playlist])
-            if session.query(Playlist).filter(Playlist.playlist_id == playlist_id).scalar() is not None:
-                logger.debug("Playlist is already in database")
-                continue
-            logger.debug(str("Found playlist " + playlist + " " + google_response['items'][0]['contentDetails']['relatedPlaylists'][playlist]))
-            playlist_obj = Playlist()
-            playlist_obj.playlist_id = str(google_response['items'][0]['contentDetails']['relatedPlaylists'][playlist])
-            playlist_obj.playlist_name = str(playlist)
-            playlist_obj.channel_id = session.query(Channel).filter(Channel.channel_id == local_channel_id).scalar().id
-            playlist_obj.monitored = monitored
-            session.add(playlist_obj)
-            session.commit()
-            if download_from is not None:
-                modify_playlist()
 
+    total_playlists: int = google_response["pageInfo"]["totalResults"]
+
+    playlists: list[any] = google_response['items']
+    
+    if total_playlists > 50:
+        next_page_token: str = google_response["nextPageToken"]
+
+        google_response = get_playlist_ids_from_google(local_channel_id, next_page_token=next_page_token)
+
+        playlists.extend(google_response['items'])
+
+    for playlist in playlists:
+        playlist_id = playlist["id"]
+        playlist_name = playlist["snippet"]["title"]
+
+        if session.query(Playlist).filter(Playlist.playlist_id == playlist_id).scalar() is not None:
+            logger.debug("Playlist is already in database")
+            continue
+
+        logger.debug(f"Found playlist {playlist_name}: {playlist_id}")
+
+        playlist_obj = Playlist()
+        playlist_obj.playlist_id = playlist_id
+        playlist_obj.playlist_name = playlist_name
+        playlist_obj.entries = playlist["contentDetails"]["itemCount"]
+        playlist_obj.channel_id = session.query(Channel).filter(Channel.channel_id == local_channel_id).scalar().id
+        playlist_obj.monitored = monitored
+        session.add(playlist_obj)
+        session.commit()
+        if download_from is not None:
+            modify_playlist()
 
 def get_channel_name_and_country_from_google(local_channel_id):
     # Check for exceeded google quota
