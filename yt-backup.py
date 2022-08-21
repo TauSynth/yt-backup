@@ -86,7 +86,7 @@ args = parser.parse_args()
 logger = logging.getLogger('yt-backup')
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
-fl = logging.FileHandler("/tmp/yt-backup.log".format())
+fl = logging.FileHandler("F:\\Projects\\yt-backup\\tmp\\yt-backup.log".format())
 if args.debug:
     ch.setLevel(logging.DEBUG)
     fl.setLevel(logging.DEBUG)
