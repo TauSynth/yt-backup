@@ -159,7 +159,7 @@ def persist_quota():
         return None
     stat_quota = Statistic()
     stat_quota.statistic_type = "used_quota"
-    stat_quota.statistic_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    stat_quota.statistic_date = datetime.utcnow()
     stat_quota.statistic_value = str(used_quota_this_run)
     session.add(stat_quota)
     session.commit()
@@ -218,7 +218,7 @@ def log_operation(duration, operation_type, operation_description):
     operation.duration = duration
     operation.operation_type = operation_type
     operation.operation_description = operation_description
-    operation.operation_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    operation.operation_date = datetime.utcnow()
     session.add(operation)
     session.commit()
 
@@ -228,7 +228,7 @@ def set_status(new_status):
     if current_status is None:
         current_status = Statistic()
         current_status.statistic_type = "status"
-    current_status.statistic_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    current_status.statistic_date = datetime.utcnow()
     current_status.statistic_value = new_status
     session.add(current_status)
     session.commit()
@@ -239,7 +239,7 @@ def set_currently_downloading(video_name):
     if currently_downloading is None:
         currently_downloading = Statistic()
         currently_downloading.statistic_type = "currently_downloading"
-    currently_downloading.statistic_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    currently_downloading.statistic_date = datetime.utcnow()
     currently_downloading.statistic_value = video_name
     session.add(currently_downloading)
     session.commit()
@@ -250,7 +250,7 @@ def set_http_429_state():
     if http_429_state is None:
         http_429_state = Statistic()
         http_429_state.statistic_type = "http_429_state"
-    http_429_state.statistic_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    http_429_state.statistic_date = datetime.utcnow()
     http_429_state.statistic_value = get_current_ytdl_ip()
     session.add(http_429_state)
     session.commit()
@@ -261,7 +261,7 @@ def clear_http_429_state():
     if http_429_state is None:
         http_429_state = Statistic()
         http_429_state.statistic_type = "http_429_state"
-    http_429_state.statistic_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    http_429_state.statistic_date = datetime.utcnow()
     http_429_state.statistic_value = ""
     session.add(http_429_state)
     session.commit()
@@ -309,7 +309,7 @@ def set_quota_exceeded_state():
     if quota_exceeded_state is None:
         quota_exceeded_state = Statistic()
         quota_exceeded_state.statistic_type = "quota_exceeded_state"
-    quota_exceeded_state.statistic_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    quota_exceeded_state.statistic_date = datetime.utcnow()
     quota_exceeded_state.statistic_value = "Quota exceeded"
     session.add(quota_exceeded_state)
     session.commit()
@@ -369,7 +369,7 @@ def log_statistic(statistic_type, statistic_value):
     statistic = Statistic()
     statistic.statistic_type = statistic_type
     statistic.statistic_value = statistic_value
-    statistic.statistic_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    statistic.statistic_date = datetime.utcnow()
     session.add(statistic)
     session.commit()
 
@@ -1058,7 +1058,7 @@ def download_videos():
             logger.error(
                 "Could not find the downloaded video file. Maybe there was a problem during download. Will retry in next run.")
             continue
-        video.downloaded = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        video.downloaded = datetime.utcnow()
         video.runtime = get_video_duration(video_file)
         logger.debug("Video runtime was set to " + str(video.runtime) + " seconds")
         video.resolution = get_video_resolution(video_file)
@@ -1552,7 +1552,7 @@ def modify_playlist():
         logger.error("Given playlist-id is not in database. Please find correct one with \"python3 yt-backup.py list_playlists\" command or add channel with playlist first.")
         return None
     if download_from == "now":
-        download_from = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        download_from = datetime.utcnow()
     if download_from == "all":
         playlist.download_from_date = None
         videos = session.query(Video).filter(Video.playlist == playlist.id)
@@ -1610,7 +1610,7 @@ def verify_and_update_data_model():
         current_data_model_version = 1
         current_data_model_version_stat.statistic_value = str(current_data_model_version)
         current_data_model_version_stat.statistic_type = "data_model_version"
-        current_data_model_version_stat.statistic_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        current_data_model_version_stat.statistic_date = datetime.utcnow()
         with engine.connect() as con:
             try:
                 rs = con.execute('ALTER TABLE playlists ADD download_from_date DATETIME NULL DEFAULT NULL AFTER channel_id;')
@@ -1628,7 +1628,7 @@ def verify_and_update_data_model():
         current_data_model_version = 2
         current_data_model_version_stat.statistic_value = str(current_data_model_version)
         current_data_model_version_stat.statistic_type = "data_model_version"
-        current_data_model_version_stat.statistic_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        current_data_model_version_stat.statistic_date = datetime.utcnow()
         with engine.connect() as con:
             try:
                 rs = con.execute('ALTER TABLE channels ADD offline INT NULL AFTER channel_name;')
@@ -1645,7 +1645,7 @@ def verify_and_update_data_model():
         current_data_model_version = 3
         current_data_model_version_stat.statistic_value = str(current_data_model_version)
         current_data_model_version_stat.statistic_type = "data_model_version"
-        current_data_model_version_stat.statistic_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        current_data_model_version_stat.statistic_date = datetime.utcnow()
         with engine.connect() as con:
             try:
                 rs = con.execute('ALTER TABLE playlists ADD etag VARCHAR(255) NULL AFTER download_from_date;')
@@ -1663,7 +1663,7 @@ def verify_and_update_data_model():
         current_data_model_version = 4
         current_data_model_version_stat.statistic_value = str(current_data_model_version)
         current_data_model_version_stat.statistic_type = "data_model_version"
-        current_data_model_version_stat.statistic_date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        current_data_model_version_stat.statistic_date = datetime.utcnow()
         with engine.connect() as con:
             try:
                 rs = con.execute(
