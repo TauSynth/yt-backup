@@ -866,8 +866,10 @@ def get_video_infos():
                 # logger.debug("Description: " + video_raw["snippet"]["description"])
                 parsed_from_api = parsed_from_api + 1
                 video = Video()
-                video.video_id = video_raw["contentDetails"]["videoId"]
                 video.title = video_raw["snippet"]["title"]
+                video.owner_channel_title = video_raw["snippet"].get("videoOwnerChannelTitle", "???")
+                video.video_id = video_raw["contentDetails"]["videoId"]
+                video.owner_channel_id = video_raw["snippet"].get("videoOwnerChannelId", "???")
                 video.description = video_raw["snippet"]["description"]
                 video.upload_date = video_raw["snippet"]["publishedAt"]
                 video.upload_date = datetime.strptime(str(video.upload_date)[0:19], '%Y-%m-%dT%H:%M:%S')

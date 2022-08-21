@@ -22,8 +22,10 @@ class Video(Base):
     __tablename__ = 'videos'
     id = Column(Integer, primary_key=True)
     playlist = Column(Integer, ForeignKey('playlists.id'), nullable=False)
-    video_id = Column(String(length=255), nullable=False, unique=True)
     title = Column(Text(length=5000), nullable=False)
+    owner_channel_title = Column(Text(length=5000), nullable=False)
+    video_id = Column(String(length=255), nullable=False)
+    owner_channel_id = Column(String(length=255), nullable=False)
     description = Column(Text(length=99999), nullable=False)
     size = Column(String(length=30))
     resolution = Column(String(length=20))
