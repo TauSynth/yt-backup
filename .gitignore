@@ -130,3 +130,10 @@ dmypy.json
 
 client_secret.json
 token.pickle
+
+# PyCharm
+.idea/
+
+# Other
+/database
+config.json
